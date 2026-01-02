@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.gitignore
+*.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+npm-debug.log
+bun.lockb
+package-lock.json
+
