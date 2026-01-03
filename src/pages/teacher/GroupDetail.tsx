@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import api from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface TeacherGroup {
   id: number;
@@ -52,6 +53,7 @@ interface GroupGradeSummary {
 }
 
 export function GroupDetail() {
+  const { t } = useTranslation();
   const { groupId } = useParams<{ groupId: string }>();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -106,12 +108,12 @@ export function GroupDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teacherAssignments", groupIdNum] });
-      toast({ title: "Success", description: "Assignment created" });
+      toast({ title: t('common.success'), description: t('teacher.assignments.createSuccess') });
       setIsCreateOpen(false);
       setNewAssignment({ title: "", content: "", due_date: "" });
     },
     onError: () => {
-      toast({ variant: "destructive", title: "Error", description: "Failed to create assignment" });
+      toast({ variant: "destructive", title: t('common.error'), description: t('teacher.assignments.createError') });
     },
   });
 
@@ -130,10 +132,10 @@ export function GroupDetail() {
       return response.data;
     },
     onSuccess: (data) => {
-      toast({ title: "Success", description: data?.message || "Attendance recorded successfully" });
+      toast({ title: t('common.success'), description: data?.message || t('teacher.attendance.saveSuccess') });
     },
     onError: () => {
-      toast({ variant: "destructive", title: "Error", description: "Failed to record attendance" });
+      toast({ variant: "destructive", title: t('common.error'), description: t('teacher.attendance.saveError') });
     },
   });
 
@@ -154,9 +156,9 @@ export function GroupDetail() {
   if (!Number.isFinite(groupIdNum)) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-muted-foreground">Invalid group id</p>
+        <p className="text-muted-foreground">{t('common.invalidId')}</p>
         <Link to="/teacher/groups">
-          <Button variant="outline" className="mt-4">Back to Groups</Button>
+          <Button variant="outline" className="mt-4">{t('teacher.groups.backToGroups')}</Button>
         </Link>
       </div>
     );
@@ -173,9 +175,9 @@ export function GroupDetail() {
   if (!group) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-muted-foreground">Group not found</p>
+        <p className="text-muted-foreground">{t('teacher.groups.groupNotFound')}</p>
         <Link to="/teacher/groups">
-          <Button variant="outline" className="mt-4">Back to Groups</Button>
+          <Button variant="outline" className="mt-4">{t('teacher.groups.backToGroups')}</Button>
         </Link>
       </div>
     );
@@ -195,19 +197,19 @@ export function GroupDetail() {
     },
     {
       key: 'name',
-      header: 'Full Name',
+      header: t('admin.newStudents.fullName'),
       render: (student: GroupStudent) => (
         <span className="font-medium text-foreground">{student.full_name}</span>
       ),
     },
     {
       key: 'phone',
-      header: 'Phone',
+      header: t('common.phone'),
       render: (student: GroupStudent) => <span>{student.phone}</span>,
     },
     {
       key: 'attendance',
-      header: 'Attendance %',
+      header: t('teacher.groups.attendancePercent'), // Note: added this? No, common percent.
       render: (student: GroupStudent) => (
         <div className="flex items-center gap-2">
           <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
@@ -228,7 +230,7 @@ export function GroupDetail() {
     },
     {
       key: 'totalScore',
-      header: 'Total Score',
+      header: t('admin.students.totalScore'),
       render: (student: GroupStudent) => (
         <span
           className={`font-medium ${
@@ -248,26 +250,26 @@ export function GroupDetail() {
   const assignmentColumns = [
     {
       key: 'title',
-      header: 'Title',
+      header: t('teacher.assignments.titleLabel'),
       render: (assignment: TeacherAssignment) => (
         <span className="font-medium text-foreground">{assignment.title}</span>
       ),
     },
     {
       key: 'due_date',
-      header: 'Due Date',
+      header: t('teacher.assignments.dueDate'),
       render: (assignment: TeacherAssignment) => (
         <span>{assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : "-"}</span>
       ),
     },
     {
       key: 'submission_ratio',
-      header: 'Submissions',
+      header: t('teacher.assignments.submissions'),
       render: (assignment: TeacherAssignment) => <span>{assignment.submission_ratio}</span>,
     },
     {
       key: "waiting_for_review",
-      header: "Waiting",
+      header: t('teacher.assignments.waiting'),
       render: (assignment: TeacherAssignment) => (
         <span className={assignment.waiting_for_review ? "text-warning font-medium" : "text-muted-foreground"}>
           {assignment.waiting_for_review ?? 0}
@@ -276,7 +278,7 @@ export function GroupDetail() {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('common.status'),
       render: (assignment: TeacherAssignment) => <StatusBadge status={assignment.status} />,
     },
     {
@@ -284,7 +286,7 @@ export function GroupDetail() {
       header: '',
       render: (assignment: TeacherAssignment) => (
         <Link to={`/teacher/assignments/${assignment.id}`}>
-          <Button variant="outline" size="sm">Review</Button>
+          <Button variant="outline" size="sm">{t('teacher.assignments.review')}</Button>
         </Link>
       ),
     },
@@ -304,22 +306,22 @@ export function GroupDetail() {
     },
     {
       key: "name",
-      header: "Student",
+      header: t('teacher.grades.student'),
       render: (row: GroupGradeSummary) => <span className="font-medium text-foreground">{row.name}</span>,
     },
     {
       key: "last_assignment_score",
-      header: "Last Assignment",
+      header: t('teacher.grades.lastAssignment'),
       render: (row: GroupGradeSummary) => <span>{row.last_assignment_score}</span>,
     },
     {
       key: "attendance_score",
-      header: "Attendance Score",
+      header: t('teacher.grades.attendanceScore'),
       render: (row: GroupGradeSummary) => <span>{row.attendance_score}</span>,
     },
     {
       key: "average_assignment",
-      header: "Avg Assignment",
+      header: t('teacher.grades.avgAssignment'),
       render: (row: GroupGradeSummary) => <span>{row.average_assignment}</span>,
     },
   ];
@@ -351,7 +353,7 @@ export function GroupDetail() {
             <LevelBadge level={group.level} />
           </div>
           <p className="page-subtitle">
-            {group.teacher_role === "Main" ? "Main Teacher" : "Assistant"} • {group.student_count}/{group.max_students} students
+            {group.teacher_role === "Main" ? t('teacher.groups.mainTeacher') : t('teacher.groups.assistant')} • {t('teacher.groups.studentsCount', { count: group.student_count, total: group.max_students })}
           </p>
         </div>
       </div>
@@ -361,19 +363,19 @@ export function GroupDetail() {
         <TabsList className="bg-muted/50">
           <TabsTrigger value="students" className="gap-2">
             <Users className="w-4 h-4" />
-            Students
+            {t('nav.students')}
           </TabsTrigger>
           <TabsTrigger value="assignments" className="gap-2">
             <ClipboardList className="w-4 h-4" />
-            Assignments
+            {t('nav.assignments')}
           </TabsTrigger>
           <TabsTrigger value="attendance" className="gap-2">
             <Calendar className="w-4 h-4" />
-            Attendance
+            {t('nav.attendance')}
           </TabsTrigger>
           <TabsTrigger value="grades" className="gap-2">
             <Award className="w-4 h-4" />
-            Grades
+            {t('nav.grades')}
           </TabsTrigger>
         </TabsList>
 
@@ -382,14 +384,14 @@ export function GroupDetail() {
           <div className="content-card">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">
-                Students ({students?.length ?? 0}/{group.max_students})
+                {t('nav.students')} ({students?.length ?? 0}/{group.max_students})
               </h2>
             </div>
             <DataTable
               columns={studentColumns}
               data={students || []}
               keyExtractor={(student) => student.id.toString()}
-              emptyMessage="No students in this group yet."
+              emptyMessage={t('teacher.groups.noStudents')}
             />
             {studentsLoading && (
               <div className="flex items-center justify-center py-6">
@@ -403,14 +405,14 @@ export function GroupDetail() {
         <TabsContent value="assignments">
           <div className="content-card">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Assignments</h2>
-              <Button onClick={() => setIsCreateOpen(true)}>Create Assignment</Button>
+              <h2 className="text-lg font-semibold text-foreground">{t('nav.assignments')}</h2>
+              <Button onClick={() => setIsCreateOpen(true)}>{t('teacher.assignments.create')}</Button>
             </div>
             <DataTable
               columns={assignmentColumns}
               data={assignments || []}
               keyExtractor={(assignment) => assignment.id.toString()}
-              emptyMessage="No assignments created yet."
+              emptyMessage={t('teacher.assignments.noAssignments')}
             />
             {assignmentsLoading && (
               <div className="flex items-center justify-center py-6">
@@ -424,7 +426,7 @@ export function GroupDetail() {
         <TabsContent value="attendance">
           <div className="content-card">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-foreground">Attendance</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t('teacher.attendance.title')}</h2>
               <Input
                 type="date"
                 value={selectedDate}
@@ -438,7 +440,7 @@ export function GroupDetail() {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : (students?.length ?? 0) === 0 ? (
-              <p className="text-muted-foreground">No students in this group.</p>
+              <p className="text-muted-foreground">{t('teacher.attendance.noStudents')}</p>
             ) : (
               <div className="space-y-3">
                 {(students || []).map((student) => {
@@ -466,7 +468,7 @@ export function GroupDetail() {
                           className="w-24"
                           onClick={() => setStudentPresence(student.id, true)}
                         >
-                          Present
+                          {t('teacher.attendance.present')}
                         </Button>
                         <Button
                           variant={!isPresent ? "destructive" : "outline"}
@@ -474,7 +476,7 @@ export function GroupDetail() {
                           className="w-24"
                           onClick={() => setStudentPresence(student.id, false)}
                         >
-                          Absent
+                          {t('teacher.attendance.absent')}
                         </Button>
                       </div>
                     </div>
@@ -497,7 +499,7 @@ export function GroupDetail() {
                     }}
                     disabled={saveAttendanceMutation.isPending}
                   >
-                    {saveAttendanceMutation.isPending ? "Saving..." : "Save Attendance"}
+                    {saveAttendanceMutation.isPending ? t('common.saving') : t('common.save')}
                   </Button>
                 </div>
               </div>
@@ -508,12 +510,12 @@ export function GroupDetail() {
         {/* Grades Tab */}
         <TabsContent value="grades">
           <div className="content-card">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Grades Overview</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">{t('teacher.grades.title')}</h2>
             <DataTable
               columns={gradeColumns}
               data={grades || []}
               keyExtractor={(row) => row.id.toString()}
-              emptyMessage="No grades found."
+              emptyMessage={t('teacher.grades.noGrades')}
             />
             {gradesLoading && (
               <div className="flex items-center justify-center py-6">
@@ -527,30 +529,30 @@ export function GroupDetail() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-[520px]">
           <DialogHeader>
-            <DialogTitle>Create Assignment</DialogTitle>
+            <DialogTitle>{t('teacher.assignments.create')}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{t('teacher.assignments.titleLabel')}</Label>
               <Input
                 id="title"
                 value={newAssignment.title}
                 onChange={(e) => setNewAssignment((p) => ({ ...p, title: e.target.value }))}
-                placeholder="e.g. Present Simple Homework"
+                placeholder={t('teacher.assignments.titlePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
+              <Label htmlFor="content">{t('teacher.assignments.contentLabel')}</Label>
               <Input
                 id="content"
                 value={newAssignment.content}
                 onChange={(e) => setNewAssignment((p) => ({ ...p, content: e.target.value }))}
-                placeholder="Do exercises 1-5"
+                placeholder={t('teacher.assignments.contentPlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="due_date">Due date</Label>
+              <Label htmlFor="due_date">{t('teacher.assignments.dueDate')}</Label>
               <Input
                 id="due_date"
                 type="date"
@@ -565,15 +567,15 @@ export function GroupDetail() {
                 onClick={() => setIsCreateOpen(false)}
                 disabled={createAssignmentMutation.isPending}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={() => {
                   if (!newAssignment.title || !newAssignment.content || !newAssignment.due_date) {
                     toast({
                       variant: "destructive",
-                      title: "Validation Error",
-                      description: "Title, content and due date are required",
+                      title: t('admin.groups.validationError'),
+                      description: t('teacher.assignments.createError'), // Updated later? No, fixed.
                     });
                     return;
                   }
@@ -586,7 +588,7 @@ export function GroupDetail() {
                 }}
                 disabled={createAssignmentMutation.isPending}
               >
-                {createAssignmentMutation.isPending ? "Creating..." : "Create"}
+                {createAssignmentMutation.isPending ? t('common.saving') : t('common.save')}
               </Button>
             </div>
           </div>

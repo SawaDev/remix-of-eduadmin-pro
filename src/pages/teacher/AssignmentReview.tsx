@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import api from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface TeacherAssignment {
   id: number;
@@ -30,6 +31,7 @@ interface AssignmentSubmission {
 }
 
 export function AssignmentReview() {
+  const { t } = useTranslation();
   const { assignmentId } = useParams<{ assignmentId: string }>();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -78,19 +80,19 @@ export function AssignmentReview() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["teacherAssignmentSubmissions", assignmentIdNum] });
       queryClient.invalidateQueries({ queryKey: ["teacherAssignments"] });
-      toast({ title: "Success", description: data?.message || "Submission graded successfully" });
+      toast({ title: t('common.success'), description: data?.message || t('teacher.assignments.gradeSuccess') });
     },
     onError: () => {
-      toast({ variant: "destructive", title: "Error", description: "Failed to grade submission" });
+      toast({ variant: "destructive", title: t('common.error'), description: t('teacher.assignments.gradeError') });
     },
   });
 
   if (!Number.isFinite(assignmentIdNum)) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-muted-foreground">Invalid assignment id</p>
+        <p className="text-muted-foreground">{t('teacher.assignments.invalidAssignment')}</p>
         <Link to="/teacher/assignments">
-          <Button variant="outline" className="mt-4">Back to Assignments</Button>
+          <Button variant="outline" className="mt-4">{t('teacher.groups.backToGroups')}</Button>
         </Link>
       </div>
     );
@@ -106,9 +108,9 @@ export function AssignmentReview() {
     }
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-muted-foreground">Assignment not found</p>
+        <p className="text-muted-foreground">{t('teacher.assignments.assignmentNotFound')}</p>
         <Link to="/teacher/assignments">
-          <Button variant="outline" className="mt-4">Back to Assignments</Button>
+          <Button variant="outline" className="mt-4">{t('teacher.groups.backToGroups')}</Button>
         </Link>
       </div>
     );
@@ -134,15 +136,17 @@ export function AssignmentReview() {
         <div>
           <h1 className="page-title">{assignment.title}</h1>
           <p className="page-subtitle">
-            Group: {assignment.group_name} • Due:{" "}
-            {assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : "-"}
+            {t('teacher.assignments.groupDue', {
+              group: assignment.group_name,
+              date: assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : "-"
+            })}
           </p>
         </div>
       </div>
 
       {/* Submissions */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Student Submissions</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t('teacher.assignments.studentSubmissions')}</h2>
 
         {submissionsLoading ? (
           <div className="flex items-center justify-center min-h-[200px]">
@@ -150,7 +154,7 @@ export function AssignmentReview() {
           </div>
         ) : (submissions?.length ?? 0) === 0 ? (
           <div className="content-card text-center py-12">
-            <p className="text-muted-foreground">No submissions yet</p>
+            <p className="text-muted-foreground">{t('teacher.assignments.noSubmissions')}</p>
           </div>
         ) : (
           (submissions || []).map((submission) => (
@@ -167,8 +171,8 @@ export function AssignmentReview() {
                 if (gradeValue === null || gradeValue === undefined || Number.isNaN(gradeValue)) {
                   toast({
                     variant: "destructive",
-                    title: "Validation Error",
-                    description: "Please enter a grade (0-100)",
+                    title: t('admin.groups.validationError'),
+                    description: t('teacher.assignments.gradeValidationError'),
                   });
                   return;
                 }
@@ -197,6 +201,7 @@ interface SubmissionCardProps {
 }
 
 function SubmissionCard({ submission, grade, onGradeChange, feedback, onFeedbackChange, onSubmit, isSaving }: SubmissionCardProps) {
+  const { t } = useTranslation();
   return (
     <div className="content-card">
       <div className="flex items-start justify-between mb-4">
@@ -208,7 +213,7 @@ function SubmissionCard({ submission, grade, onGradeChange, feedback, onFeedback
           <div>
             <p className="font-medium text-foreground">{submission.full_name}</p>
             <p className="text-sm text-muted-foreground">
-              Submitted: {submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "-"}
+              {t('teacher.assignments.submittedAt', { date: submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "-" })}
             </p>
           </div>
         </div>
@@ -226,7 +231,7 @@ function SubmissionCard({ submission, grade, onGradeChange, feedback, onFeedback
           <Button asChild variant="outline" className="gap-2">
             <a href={submission.file_url} target="_blank" rel="noreferrer">
               <Download className="w-4 h-4" />
-              Download File
+              {t('teacher.assignments.downloadFile')}
             </a>
           </Button>
         </div>
@@ -235,7 +240,7 @@ function SubmissionCard({ submission, grade, onGradeChange, feedback, onFeedback
       {/* Grade Input */}
       <div className="flex items-center gap-4 pt-4 border-t border-border">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-muted-foreground">Grade:</label>
+          <label className="text-sm font-medium text-muted-foreground">{t('teacher.assignments.grade')}:</label>
           <Input
             type="number"
             min={0}
@@ -243,7 +248,7 @@ function SubmissionCard({ submission, grade, onGradeChange, feedback, onFeedback
             value={grade ?? ''}
             onChange={(e) => onGradeChange(Number(e.target.value))}
             className="w-20"
-            placeholder="0-100"
+            placeholder={t('teacher.assignments.gradePlaceholder')}
             disabled={isSaving}
           />
         </div>
@@ -251,11 +256,11 @@ function SubmissionCard({ submission, grade, onGradeChange, feedback, onFeedback
         <Input
           value={feedback}
           onChange={(e) => onFeedbackChange(e.target.value)}
-          placeholder="Teacher feedback (optional)"
+          placeholder={t('teacher.assignments.feedbackPlaceholder')}
           disabled={isSaving}
         />
         <Button size="sm" onClick={onSubmit} disabled={isSaving}>
-          {isSaving ? "Saving..." : (submission.grade === null ? "Submit Grade" : "Update Grade")}
+          {isSaving ? t('common.saving') : (submission.grade === null ? t('teacher.assignments.submitGrade') : t('teacher.assignments.updateGrade'))}
         </Button>
       </div>
     </div>

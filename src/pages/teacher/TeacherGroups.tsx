@@ -6,6 +6,7 @@ import { LevelBadge } from "@/components/ui/level-badge";
 import { RoleBadge } from "@/components/ui/role-badge";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
+import { useTranslation } from "react-i18next";
 
 interface TeacherGroup {
   id: number;
@@ -17,6 +18,7 @@ interface TeacherGroup {
 }
 
 export function TeacherGroups() {
+  const { t } = useTranslation();
   const { data: teacherGroups, isLoading } = useQuery({
     queryKey: ["teacherGroups"],
     queryFn: async () => {
@@ -28,7 +30,7 @@ export function TeacherGroups() {
   const columns = [
     {
       key: 'name',
-      header: 'Group Name',
+      header: t('teacher.dashboard.table.groupName'),
       render: (group: TeacherGroup) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -40,12 +42,12 @@ export function TeacherGroups() {
     },
     {
       key: 'level',
-      header: 'Level',
+      header: t('teacher.dashboard.table.level'),
       render: (group: TeacherGroup) => <LevelBadge level={group.level} />,
     },
     {
       key: 'students',
-      header: 'Students',
+      header: t('teacher.dashboard.table.students'),
       render: (group: TeacherGroup) => (
         <div className="flex items-center gap-2">
           <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
@@ -67,7 +69,7 @@ export function TeacherGroups() {
     },
     {
       key: 'role',
-      header: 'Your Role',
+      header: t('teacher.dashboard.table.yourRole'),
       render: (group: TeacherGroup) => <RoleBadge role={group.teacher_role} />,
     },
     {
@@ -75,7 +77,7 @@ export function TeacherGroups() {
       header: '',
       render: (group: TeacherGroup) => (
         <Link to={`/teacher/groups/${group.id}`}>
-          <Button variant="outline" size="sm">Open Group</Button>
+          <Button variant="outline" size="sm">{t('teacher.groups.openGroup')}</Button>
         </Link>
       ),
     },
@@ -92,8 +94,8 @@ export function TeacherGroups() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">My Groups</h1>
-        <p className="page-subtitle">Manage your assigned teaching groups</p>
+        <h1 className="page-title">{t('teacher.groups.title')}</h1>
+        <p className="page-subtitle">{t('teacher.groups.subtitle')}</p>
       </div>
 
       <div className="content-card">
@@ -101,7 +103,7 @@ export function TeacherGroups() {
           columns={columns}
           data={teacherGroups || []}
           keyExtractor={(group) => group.id.toString()}
-          emptyMessage="You haven't been assigned to any groups yet."
+          emptyMessage={t('teacher.groups.noGroups') || t('teacher.dashboard.noGroups')}
         />
       </div>
     </div>

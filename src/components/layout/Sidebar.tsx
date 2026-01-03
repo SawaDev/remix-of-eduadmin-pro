@@ -15,37 +15,41 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   label: string;
+  translationKey: string;
   path: string;
   icon: React.ElementType;
 }
 
 const teacherNavItems: NavItem[] = [
-  { label: 'Dashboard', path: '/teacher', icon: LayoutDashboard },
-  { label: 'My Groups', path: '/teacher/groups', icon: Users },
-  { label: 'Assignments', path: '/teacher/assignments', icon: ClipboardList },
-  { label: 'Attendance', path: '/teacher/attendance', icon: Calendar },
-  { label: 'Grades', path: '/teacher/grades', icon: Award },
+  { label: 'Dashboard', translationKey: 'nav.dashboard', path: '/teacher', icon: LayoutDashboard },
+  { label: 'My Groups', translationKey: 'nav.myGroups', path: '/teacher/groups', icon: Users },
+  { label: 'Assignments', translationKey: 'nav.assignments', path: '/teacher/assignments', icon: ClipboardList },
+  { label: 'Attendance', translationKey: 'nav.attendance', path: '/teacher/attendance', icon: Calendar },
+  { label: 'Grades', translationKey: 'nav.grades', path: '/teacher/grades', icon: Award },
 ];
 
 const adminNavItems: NavItem[] = [
-  { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-  { label: 'Groups', path: '/admin/groups', icon: Users },
-  { label: 'New Students', path: '/admin/new-students', icon: UserPlus },
-  { label: 'Students', path: '/admin/students', icon: GraduationCap },
-  { label: 'Teachers', path: '/admin/teachers', icon: BookOpen },
-  { label: 'Payments', path: '/admin/payments', icon: CreditCard },
-  // { label: 'Settings', path: '/admin/settings', icon: Settings },
+  { label: 'Dashboard', translationKey: 'nav.dashboard', path: '/admin', icon: LayoutDashboard },
+  { label: 'Groups', translationKey: 'nav.groups', path: '/admin/groups', icon: Users },
+  { label: 'New Students', translationKey: 'nav.newStudents', path: '/admin/new-students', icon: UserPlus },
+  { label: 'Students', translationKey: 'nav.students', path: '/admin/students', icon: GraduationCap },
+  { label: 'Teachers', translationKey: 'nav.teachers', path: '/admin/teachers', icon: BookOpen },
+  { label: 'Payments', translationKey: 'nav.payments', path: '/admin/payments', icon: CreditCard },
+  // { label: 'Settings', translationKey: 'nav.settings', path: '/admin/settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const { t } = useTranslation();
   
   const navItems = user?.role === 'Admin' ? adminNavItems : teacherNavItems;
   const basePath = user?.role === 'Admin' ? '/admin' : '/teacher';
+  const panelTitle = user?.role === 'Admin' ? t('nav.adminPanel') : t('nav.teacherPanel');
 
   const isActive = (path: string) => {
     if (path === basePath) {
@@ -64,7 +68,7 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="font-semibold text-foreground">LMS Admin</h1>
-            <p className="text-xs text-muted-foreground capitalize">{user?.role} Panel</p>
+            <p className="text-xs text-muted-foreground capitalize">{panelTitle}</p>
           </div>
         </div>
       </div>
@@ -81,7 +85,7 @@ export function Sidebar() {
             )}
           >
             <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
+            <span>{t(item.translationKey)}</span>
           </Link>
         ))}
       </nav>
@@ -103,7 +107,7 @@ export function Sidebar() {
           className="nav-item w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <LogOut className="w-5 h-5" />
-          <span>Logout</span>
+          <span>{t('common.logout')}</span>
         </button>
       </div>
     </aside>

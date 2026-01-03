@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { StudentDialog } from '@/components/admin/StudentDialog';
 import api from '@/lib/axios';
+import { useTranslation } from 'react-i18next';
 
 interface Teacher {
   id: number;
@@ -36,6 +37,7 @@ interface Student {
 }
 
 export function AdminStudents() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
@@ -79,7 +81,7 @@ export function AdminStudents() {
     },
     {
       key: 'name',
-      header: 'Name',
+      header: t('common.name'),
       render: (student: Student) => (
         <div>
           <span className="font-medium text-foreground">{student.name}</span>
@@ -89,23 +91,23 @@ export function AdminStudents() {
     },
     {
       key: 'phone',
-      header: 'Phone',
+      header: t('common.phone'),
     },
     {
       key: 'group',
-      header: 'Group',
+      header: t('nav.groups'),
       render: (student: Student) => (
         <span className="text-muted-foreground">{student.group?.name || '-'}</span>
       ),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('common.status'),
       render: (student: Student) => <StatusBadge status={student.status} />,
     },
     {
       key: 'attendance',
-      header: 'Attendance',
+      header: t('nav.attendance'),
       render: (student: Student) => (
         <div className="flex items-center gap-2">
           <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
@@ -131,12 +133,12 @@ export function AdminStudents() {
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1" onClick={() => setSelectedStudent(student)}>
                 <Eye className="w-4 h-4" />
-                View
+                {t('common.view')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>Student Profile</DialogTitle>
+                <DialogTitle>{t('admin.students.profile')}</DialogTitle>
               </DialogHeader>
               <StudentProfile student={student} />
             </DialogContent>
@@ -161,12 +163,12 @@ export function AdminStudents() {
     <div className="animate-fade-in">
       <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="page-title">Students Management</h1>
-          <p className="page-subtitle">View and manage all students</p>
+          <h1 className="page-title">{t('admin.students.title')}</h1>
+          <p className="page-subtitle">{t('admin.students.subtitle')}</p>
         </div>
         <Button className="gap-2" onClick={handleAddNew}>
           <Plus className="w-4 h-4" />
-          Add New Student
+          {t('admin.students.add')}
         </Button>
       </div>
 
@@ -175,7 +177,7 @@ export function AdminStudents() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name, phone, or email..."
+            placeholder={t('admin.students.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -188,7 +190,7 @@ export function AdminStudents() {
           columns={columns}
           data={filteredStudents}
           keyExtractor={(student) => student.id.toString()}
-          emptyMessage="No students found"
+          emptyMessage={t('admin.students.noStudents')}
         />
       </div>
 
@@ -202,6 +204,7 @@ export function AdminStudents() {
 }
 
 function StudentProfile({ student }: { student: Student }) {
+  const { t } = useTranslation();
   return (
     <div className="pt-4 space-y-6">
       {/* Basic Info */}
@@ -220,29 +223,29 @@ function StudentProfile({ student }: { student: Student }) {
       {/* Details Grid */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-sm text-muted-foreground">Group</p>
+          <p className="text-sm text-muted-foreground">{t('nav.groups')}</p>
           <p className="font-medium text-foreground">{student.group?.name || '-'}</p>
         </div>
         <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-sm text-muted-foreground">Total Score</p>
+          <p className="text-sm text-muted-foreground">{t('admin.students.totalScore')}</p>
           <p className="font-medium text-foreground">{student.total_score}</p>
         </div>
         <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-sm text-muted-foreground">Main Teacher</p>
+          <p className="text-sm text-muted-foreground">{t('admin.groups.mainTeacher')}</p>
           <p className="font-medium text-foreground">{student.teacher?.name || '-'}</p>
         </div>
         <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-sm text-muted-foreground">Assistant</p>
+          <p className="text-sm text-muted-foreground">{t('admin.groups.assistantTeacher')}</p>
           <p className="font-medium text-foreground">{student.assistant_teacher?.name || '-'}</p>
         </div>
       </div>
 
       {/* Scores */}
       <div className="space-y-3">
-        <h4 className="font-medium text-foreground">Performance</h4>
+        <h4 className="font-medium text-foreground">{t('common.performance')}</h4>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Attendance Rate</span>
+            <span className="text-sm text-muted-foreground">{t('nav.attendance')}</span>
             <span className="font-medium">{student.attendance_rate}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -260,13 +263,13 @@ function StudentProfile({ student }: { student: Student }) {
 
       {/* Payment Info */}
       <div className="border-t border-border pt-4">
-        <h4 className="font-medium text-foreground mb-3">Payment Expiry</h4>
+        <h4 className="font-medium text-foreground mb-3">{t('admin.students.paymentExpiry')}</h4>
         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div>
             <p className="text-sm text-muted-foreground">
               {student.payment_expiry
                 ? new Date(student.payment_expiry).toLocaleDateString()
-                : 'Not set'}
+                : t('admin.students.notSet')}
             </p>
           </div>
           <StatusBadge 

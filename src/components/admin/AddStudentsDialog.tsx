@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/axios";
+import { useTranslation } from "react-i18next";
 
 function getApiErrorMessage(err: unknown, fallback: string) {
   const anyErr = err as any;
@@ -51,6 +52,7 @@ export function AddStudentsDialog({
   isOpen,
   onClose,
 }: AddStudentsDialogProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
   const [selectionError, setSelectionError] = useState<string>("");
@@ -97,16 +99,16 @@ export function AddStudentsDialog({
       queryClient.invalidateQueries({ queryKey: ["adminGroupDetail", groupId] });
       queryClient.invalidateQueries({ queryKey: ["newStudents"] }); // Refresh available students
       toast({
-        title: "Success",
-        description: "Students added to group successfully",
+        title: t('common.success'),
+        description: t('admin.groups.addSuccess'),
       });
       handleClose();
     },
     onError: (err) => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: getApiErrorMessage(err, "Failed to add students to group"),
+        title: t('common.error'),
+        description: getApiErrorMessage(err, t('admin.groups.updateError')),
       });
     },
   });
@@ -124,17 +126,17 @@ export function AddStudentsDialog({
 
   const handleAddStudents = () => {
     if (!isGroupIdValid) {
-      setSelectionError("Invalid group id. Please refresh and try again.");
+      setSelectionError(t('admin.groups.invalidGroupId'));
       return;
     }
     const uniqueIds = Array.from(new Set(selectedStudents));
     if (uniqueIds.length === 0) {
-      setSelectionError("Select at least 1 student.");
+      setSelectionError(t('admin.groups.selectAtLeastOne'));
       return;
     }
     // Basic safety to avoid sending huge payloads accidentally.
     if (uniqueIds.length > 100) {
-      setSelectionError("You can add up to 100 students at a time.");
+      setSelectionError(t('admin.groups.maxStudentsError'));
       return;
     }
     addStudentsMutation.mutate(selectedStudents);
@@ -157,7 +159,7 @@ export function AddStudentsDialog({
     const ids = filteredStudents.map((s) => s.id);
     const next = Array.from(new Set([...selectedStudents, ...ids]));
     if (next.length > 100) {
-      setSelectionError("You can add up to 100 students at a time.");
+      setSelectionError(t('admin.groups.maxStudentsError'));
       return;
     }
     setSelectedStudents(next);
@@ -185,14 +187,14 @@ export function AddStudentsDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Add Students to Group</DialogTitle>
+          <DialogTitle>{t('admin.groups.addStudentsTitle')}</DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <div className="relative mb-4">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search students..."
+              placeholder={t('admin.groups.searchStudents')}
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -202,21 +204,21 @@ export function AddStudentsDialog({
 
           {!isGroupIdValid && (
             <div className="mb-3 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              Invalid group id. Please refresh the page and try again.
+              {t('admin.groups.invalidGroupId')}
             </div>
           )}
 
           <div className="border rounded-md">
             <div className="p-3 border-b bg-muted/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium">Available Students</span>
+                <span className="text-sm font-medium">{t('admin.groups.availableStudents')}</span>
                 <span className="text-xs text-muted-foreground">
-                  {filteredStudents.length} shown • {allAvailableStudents.length} total
+                  {t('admin.groups.studentsShown', { count: filteredStudents.length, total: allAvailableStudents.length })}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
-                  {selectedStudents.length} selected
+                  {t('admin.groups.studentsSelected', { count: selectedStudents.length })}
                 </span>
                 <Button
                   type="button"
@@ -225,7 +227,7 @@ export function AddStudentsDialog({
                   onClick={handleClearSelection}
                   disabled={selectedStudents.length === 0 || isSubmitting}
                 >
-                  Clear
+                  {t('common.clear')}
                 </Button>
                 <Button
                   type="button"
@@ -234,7 +236,7 @@ export function AddStudentsDialog({
                   onClick={handleSelectAllFiltered}
                   disabled={filteredStudents.length === 0 || isSubmitting}
                 >
-                  Select all
+                  {t('common.selectAll')}
                 </Button>
               </div>
             </div>
@@ -247,15 +249,15 @@ export function AddStudentsDialog({
               ) : isError ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center">
                   <p className="text-sm text-destructive">
-                    {getApiErrorMessage(error, "Failed to load students")}
+                    {getApiErrorMessage(error, t('admin.groups.failedToLoadStudents'))}
                   </p>
                   <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
-                    Retry
+                    {t('common.retry')}
                   </Button>
                 </div>
               ) : filteredStudents.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  No students found
+                  {t('admin.groups.noStudentsFound')}
                 </div>
               ) : (
                 <div className="divide-y">
@@ -299,7 +301,7 @@ export function AddStudentsDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleRequestClose} disabled={isSubmitting}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleAddStudents} 
@@ -309,7 +311,7 @@ export function AddStudentsDialog({
               isSubmitting
             }
           >
-            {isSubmitting ? "Adding..." : `Add ${selectedStudents.length} Students`}
+            {isSubmitting ? t('admin.groups.adding') : t('admin.groups.addCount', { count: selectedStudents.length })}
           </Button>
         </DialogFooter>
       </DialogContent>

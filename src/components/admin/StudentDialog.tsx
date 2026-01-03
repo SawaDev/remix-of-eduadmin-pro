@@ -22,6 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/axios";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const studentSchema = z.object({
   name: z.string().trim().min(1, "Full name is required"),
@@ -74,6 +75,7 @@ export function StudentDialog({
   onClose,
   studentToEdit,
 }: StudentDialogProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<StudentFormData>({
     name: "",
     email: "",
@@ -146,16 +148,16 @@ export function StudentDialog({
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
         toast({
-          title: "Success",
-          description: "Student created and password copied to clipboard",
+          title: t('common.success'),
+          description: t('admin.students.createSuccess'),
         });
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to create student",
+        title: t('common.error'),
+        description: t('admin.students.createError'),
       });
     },
   });
@@ -169,15 +171,15 @@ export function StudentDialog({
       queryClient.invalidateQueries({ queryKey: ["newStudents"] });
       handleClose();
       toast({
-        title: "Success",
-        description: "Student updated successfully",
+        title: t('common.success'),
+        description: t('admin.students.updateSuccess'),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update student",
+        title: t('common.error'),
+        description: t('admin.students.updateError'),
       });
     },
   });
@@ -212,8 +214,8 @@ export function StudentDialog({
       });
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Please fix the highlighted fields",
+        title: t('admin.groups.validationError'),
+        description: t('admin.groups.fixFields'),
       });
       return;
     }
@@ -236,8 +238,8 @@ export function StudentDialog({
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
             toast({
-                title: "Copied",
-                description: "Password copied to clipboard",
+                title: t('admin.students.copyPassword'),
+                description: t('admin.students.copyPasswordAuto'),
             });
         });
     }
@@ -248,9 +250,9 @@ export function StudentDialog({
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Student Created Successfully</DialogTitle>
+            <DialogTitle>{t('admin.students.createdSuccess')}</DialogTitle>
             <DialogDescription>
-              The password has been automatically generated. Please share these credentials with the student.
+              {t('admin.students.createdDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
@@ -261,12 +263,12 @@ export function StudentDialog({
                 </Button>
              </div>
              <p className="text-sm text-muted-foreground text-center">
-                {isCopied ? "Password copied to clipboard!" : "Password copied to clipboard automatically."}
+                {isCopied ? t('admin.students.copyPassword') : t('admin.students.copyPasswordAuto')}
              </p>
           </div>
           <DialogFooter>
             <Button onClick={handleClose}>
-              Done
+              {t('common.done')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -278,12 +280,12 @@ export function StudentDialog({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{studentToEdit ? "Edit Student" : "Add New Student"}</DialogTitle>
+          <DialogTitle>{studentToEdit ? t('admin.students.edit') : t('admin.students.new')}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name">{t('admin.newStudents.fullName')}</Label>
             <Input
               id="name"
               placeholder="John Doe"
@@ -302,7 +304,7 @@ export function StudentDialog({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">{t('common.phone')}</Label>
               <Input
                 id="phone"
                 placeholder="998901234567"
@@ -322,7 +324,7 @@ export function StudentDialog({
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('common.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -342,7 +344,7 @@ export function StudentDialog({
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="payment_expiry">Payment Expiry (Optional)</Label>
+            <Label htmlFor="payment_expiry">{t('admin.students.paymentExpiryOptional')}</Label>
             <Input
               id="payment_expiry"
               type="date"
@@ -362,7 +364,7 @@ export function StudentDialog({
           
           {studentToEdit && (
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t('common.status')}</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => {
@@ -372,7 +374,7 @@ export function StudentDialog({
                 disabled={isSaving}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={t('admin.students.selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NEW_STUDENT">New Student</SelectItem>
@@ -387,13 +389,13 @@ export function StudentDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isSaving}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={isSubmitDisabled}
           >
-            {isSaving ? "Saving..." : (studentToEdit ? "Update Student" : "Create Student")}
+            {isSaving ? t('common.saving') : (studentToEdit ? t('common.save') : t('common.save'))}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import api from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface TeacherGroup {
   id: number;
@@ -27,6 +28,7 @@ interface GroupStudent {
 }
 
 export function TeacherAttendance() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -97,11 +99,11 @@ export function TeacherAttendance() {
       return response.data;
     },
     onSuccess: (data) => {
-      toast({ title: "Success", description: data?.message || "Attendance recorded successfully" });
+      toast({ title: t('common.success'), description: data?.message || t('teacher.attendance.saveSuccess') });
       // no GET attendance endpoint yet; keep local state as source of truth for now
     },
     onError: () => {
-      toast({ variant: "destructive", title: "Error", description: "Failed to record attendance" });
+      toast({ variant: "destructive", title: t('common.error'), description: t('teacher.attendance.saveError') });
     },
   });
 
@@ -119,8 +121,8 @@ export function TeacherAttendance() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">Attendance</h1>
-        <p className="page-subtitle">Record daily attendance for your groups</p>
+        <h1 className="page-title">{t('teacher.attendance.title')}</h1>
+        <p className="page-subtitle">{t('teacher.attendance.subtitle')}</p>
       </div>
 
       {/* Controls */}
@@ -128,11 +130,11 @@ export function TeacherAttendance() {
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[200px]">
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
-              Select Group
+              {t('teacher.attendance.selectGroup')}
             </label>
             <Select value={selectedGroupId} onValueChange={setSelectedGroupId} disabled={groupsLoading}>
               <SelectTrigger>
-                <SelectValue placeholder={groupsLoading ? "Loading groups..." : "Select a group"} />
+                <SelectValue placeholder={groupsLoading ? t('teacher.attendance.loadingGroups') : t('teacher.attendance.selectGroupPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {(teacherGroups || []).map((group) => (
@@ -145,7 +147,7 @@ export function TeacherAttendance() {
           </div>
           <div className="w-[200px]">
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
-              Date
+              {t('teacher.attendance.date')}
             </label>
             <Input
               type="date"
@@ -161,17 +163,17 @@ export function TeacherAttendance() {
         <div className="flex gap-4 mb-6">
           <div className="flex-1 content-card text-center">
             <p className="text-3xl font-semibold text-success">{presentCount}</p>
-            <p className="text-sm text-muted-foreground">Present</p>
+            <p className="text-sm text-muted-foreground">{t('teacher.attendance.present')}</p>
           </div>
           <div className="flex-1 content-card text-center">
             <p className="text-3xl font-semibold text-destructive">{absentCount}</p>
-            <p className="text-sm text-muted-foreground">Absent</p>
+            <p className="text-sm text-muted-foreground">{t('teacher.attendance.absent')}</p>
           </div>
           <div className="flex-1 content-card text-center">
             <p className="text-3xl font-semibold text-muted-foreground">
               {unmarkedCount}
             </p>
-            <p className="text-sm text-muted-foreground">Unmarked</p>
+            <p className="text-sm text-muted-foreground">{t('teacher.attendance.unmarked')}</p>
           </div>
         </div>
       )}
@@ -180,7 +182,7 @@ export function TeacherAttendance() {
       <div className="content-card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">
-            {selectedGroup?.name || 'Select a group'}
+            {selectedGroup?.name || t('teacher.attendance.pleaseSelectGroup')}
           </h2>
           <Button
             disabled={totalStudents === 0 || saveAttendanceMutation.isPending || studentsLoading}
@@ -197,7 +199,7 @@ export function TeacherAttendance() {
               });
             }}
           >
-            {saveAttendanceMutation.isPending ? "Saving..." : "Save Attendance"}
+            {saveAttendanceMutation.isPending ? t('common.saving') : t('teacher.attendance.saveButton')}
           </Button>
         </div>
 
@@ -207,7 +209,7 @@ export function TeacherAttendance() {
           </div>
         ) : totalStudents === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            {selectedGroupId ? 'No students in this group' : 'Please select a group'}
+            {selectedGroupId ? t('teacher.attendance.noStudentsInGroup') : t('teacher.attendance.pleaseSelectGroup')}
           </div>
         ) : (
           <div className="space-y-3">
@@ -233,7 +235,7 @@ export function TeacherAttendance() {
                     className="w-24"
                     onClick={() => setStudentPresence(student.id, true)}
                   >
-                    Present
+                    {t('teacher.attendance.present')}
                   </Button>
                   <Button
                     variant={(attendanceForSelection[student.id] ?? true) === false ? 'destructive' : 'outline'}
@@ -241,7 +243,7 @@ export function TeacherAttendance() {
                     className="w-24"
                     onClick={() => setStudentPresence(student.id, false)}
                   >
-                    Absent
+                    {t('teacher.attendance.absent')}
                   </Button>
                 </div>
               </div>

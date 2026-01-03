@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Plus, Pencil, Eye, Loader2 } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -72,6 +73,7 @@ interface GroupDetail {
 }
 
 export function AdminGroups() {
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<number | null>(null);
   const [groupForm, setGroupForm] = useState<GroupFormData>({
@@ -205,13 +207,13 @@ export function AdminGroups() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminGroups"] });
       closeDialog();
-      toast({ title: "Success", description: "Group created successfully" });
+      toast({ title: t("common.success"), description: t("admin.groups.createSuccess") });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to create group",
+        title: t("common.error"),
+        description: t("admin.groups.createError"),
       });
     },
   });
@@ -232,13 +234,13 @@ export function AdminGroups() {
         queryKey: ["adminGroupDetail", editingGroupId],
       });
       closeDialog();
-      toast({ title: "Success", description: "Group updated successfully" });
+      toast({ title: t("common.success"), description: t("admin.groups.updateSuccess") });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update group",
+        title: t("common.error"),
+        description: t("admin.groups.updateError"),
       });
     },
   });
@@ -257,8 +259,8 @@ export function AdminGroups() {
       });
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Please fix the highlighted fields",
+        title: t("admin.groups.validationError"),
+        description: t("admin.groups.fixFields"),
       });
       return;
     }
@@ -301,7 +303,7 @@ export function AdminGroups() {
   const columns = [
     {
       key: "name",
-      header: "Group Name",
+      header: t("admin.groups.name"),
       render: (group: GroupListItem) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -313,7 +315,7 @@ export function AdminGroups() {
     },
     {
       key: "students",
-      header: "Students",
+      header: t("admin.groups.students"),
       render: (group: GroupListItem) => (
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{group.student_count}</span>
@@ -322,14 +324,14 @@ export function AdminGroups() {
     },
     {
       key: "main_teacher",
-      header: "Main Teacher",
+      header: t("admin.groups.mainTeacher"),
       render: (group: GroupListItem) => (
         <span>{group.main_teacher || "-"}</span>
       ),
     },
     {
       key: "assistant_teacher",
-      header: "Assistant",
+      header: t("admin.groups.assistant"),
       render: (group: GroupListItem) => (
         <span className="text-muted-foreground">
           {group.assistant_teacher || "-"}
@@ -344,7 +346,7 @@ export function AdminGroups() {
           <Link to={`/admin/groups/${group.id}`}>
             <Button variant="outline" size="sm" className="gap-1">
               <Eye className="w-4 h-4" />
-              View
+              {t("common.view")}
             </Button>
           </Link>
           <Button
@@ -354,7 +356,7 @@ export function AdminGroups() {
             onClick={() => openEditDialog(group.id)}
           >
             <Pencil className="w-4 h-4" />
-            Edit
+            {t("common.edit")}
           </Button>
         </div>
       ),
@@ -373,28 +375,28 @@ export function AdminGroups() {
     <div className="animate-fade-in">
       <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="page-title">Groups Management</h1>
-          <p className="page-subtitle">Create and manage study groups</p>
+          <h1 className="page-title">{t("admin.groups.title")}</h1>
+          <p className="page-subtitle">{t("admin.groups.subtitle")}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" onClick={openCreateDialog}>
               <Plus className="w-4 h-4" />
-              Create Group
+              {t("admin.groups.create")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingGroupId ? "Edit Group" : "Create New Group"}
+                {editingGroupId ? t("admin.groups.edit") : t("admin.groups.new")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Group Name</Label>
+                <Label htmlFor="name">{t("admin.groups.name")}</Label>
                 <Input
                   id="name"
-                  placeholder="e.g., Morning Beginners A"
+                  placeholder={t("admin.groups.placeholderName")}
                   value={groupForm.name}
                   onChange={(e) => {
                     if (!touched.name)
@@ -410,7 +412,7 @@ export function AdminGroups() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="level">Level</Label>
+                <Label htmlFor="level">{t("admin.groups.level")}</Label>
                 <Select
                   value={groupForm.level}
                   onValueChange={(value) => {
@@ -421,17 +423,17 @@ export function AdminGroups() {
                   disabled={!!isSaving}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder={t("admin.groups.selectLevel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {levelsLoading && (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        Loading levels...
+                        {t("admin.groups.loadingLevels")}
                       </div>
                     )}
                     {!levelsLoading && (levelsData?.length ?? 0) === 0 && (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        No levels found
+                        {t("admin.groups.noLevels")}
                       </div>
                     )}
                     {(levelsData || []).map((lvl) => (
@@ -448,7 +450,7 @@ export function AdminGroups() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="mainTeacher">Main Teacher</Label>
+                <Label htmlFor="mainTeacher">{t("admin.groups.mainTeacher")}</Label>
                 <Select
                   value={groupForm.main_teacher_id}
                   onValueChange={(value) => {
@@ -459,7 +461,7 @@ export function AdminGroups() {
                   disabled={!!isSaving}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select teacher" />
+                    <SelectValue placeholder={t("admin.groups.selectTeacher")} />
                   </SelectTrigger>
                   <SelectContent>
                     {teachersData?.teachers.map((teacher) => (
@@ -480,7 +482,7 @@ export function AdminGroups() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="assistantTeacher">
-                  Assistant Teacher (Optional)
+                  {t("admin.groups.assistantTeacher")}
                 </Label>
                 <Select
                   value={groupForm.assistant_teacher_id}
@@ -493,10 +495,10 @@ export function AdminGroups() {
                   disabled={!!isSaving}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select assistant" />
+                    <SelectValue placeholder={t("admin.groups.selectAssistant")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none">{t("admin.groups.none")}</SelectItem>
                     {teachersData?.assistants.map((teacher) => (
                       <SelectItem
                         key={teacher.id}
@@ -514,16 +516,16 @@ export function AdminGroups() {
                   onClick={closeDialog}
                   disabled={!!isSaving}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
                   {isSaving
                     ? editingGroupId
-                      ? "Updating..."
-                      : "Creating..."
+                      ? t("admin.groups.updating")
+                      : t("admin.groups.creating")
                     : editingGroupId
-                    ? "Update Group"
-                    : "Create Group"}
+                    ? t("admin.groups.update")
+                    : t("admin.groups.create")}
                 </Button>
               </div>
             </div>
@@ -536,7 +538,7 @@ export function AdminGroups() {
           columns={columns}
           data={groups || []}
           keyExtractor={(group) => group.id.toString()}
-          emptyMessage="No groups created yet."
+          emptyMessage={t("admin.groups.noGroups")}
         />
       </div>
     </div>

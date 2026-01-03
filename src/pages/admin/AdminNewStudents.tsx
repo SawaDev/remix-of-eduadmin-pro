@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { StudentDialog } from '@/components/admin/StudentDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from "react-i18next";
 import api from '@/lib/axios';
 import { z } from "zod";
 
@@ -41,6 +42,7 @@ interface GroupListItem {
 }
 
 export function AdminNewStudents() {
+  const { t } = useTranslation();
   const [selectedStudent, setSelectedStudent] = useState<NewStudent | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [selectedLevel, setSelectedLevel] = useState<string>('');
@@ -84,15 +86,15 @@ export function AdminNewStudents() {
       setSelectedGroupId('');
       setSelectedLevel('');
       toast({
-        title: "Student Activated",
-        description: "Student has been activated and added to the group successfully.",
+        title: t("admin.newStudents.activateSuccess"),
+        description: t("admin.newStudents.activateSuccessDesc"),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to activate student. Please check if all fields are filled.",
+        title: t("common.error"),
+        description: t("admin.newStudents.activateError"),
       });
     },
   });
@@ -120,8 +122,8 @@ export function AdminNewStudents() {
       setActivateTouched({ group: true });
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Please fix the highlighted fields",
+        title: t("admin.newStudents.validationError"),
+        description: t("admin.newStudents.fixFields"),
       });
       return;
     }
@@ -159,7 +161,7 @@ export function AdminNewStudents() {
     },
     {
       key: 'name',
-      header: 'Full Name',
+      header: t("admin.newStudents.fullName"),
       render: (student: NewStudent) => (
         <div>
           <span className="font-medium text-foreground">{student.full_name}</span>
@@ -169,18 +171,18 @@ export function AdminNewStudents() {
     },
     {
       key: 'phone',
-      header: 'Phone',
+      header: t("common.phone"),
     },
     {
       key: 'created_at',
-      header: 'Registration Date',
+      header: t("admin.newStudents.registrationDate"),
       render: (student: NewStudent) => (
         <span>{new Date(student.created_at).toLocaleDateString()}</span>
       ),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t("common.status"),
       render: () => <StatusBadge status="NEW_STUDENT" />,
     },
     {
@@ -199,7 +201,7 @@ export function AdminNewStudents() {
           }}
         >
           <UserPlus className="w-4 h-4" />
-          Activate
+          {t("admin.newStudents.activate")}
         </Button>
       ),
     },
@@ -217,12 +219,12 @@ export function AdminNewStudents() {
     <div className="animate-fade-in">
       <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="page-title">New Students</h1>
-          <p className="page-subtitle">Review and activate new student registrations</p>
+          <h1 className="page-title">{t("admin.newStudents.title")}</h1>
+          <p className="page-subtitle">{t("admin.newStudents.subtitle")}</p>
         </div>
         <Button className="gap-2" onClick={() => setIsStudentDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Add New Student
+          {t("admin.newStudents.add")}
         </Button>
       </div>
 
@@ -234,10 +236,10 @@ export function AdminNewStudents() {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">
-              {newStudents.length} student{newStudents.length !== 1 ? 's' : ''} waiting for activation
+              {t("admin.newStudents.waitingCount", { count: newStudents.length })}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Assign them to a group to activate their accounts
+              {t("admin.newStudents.bannerDesc")}
             </p>
           </div>
         </div>
@@ -248,7 +250,7 @@ export function AdminNewStudents() {
           columns={columns}
           data={newStudents}
           keyExtractor={(student) => student.id.toString()}
-          emptyMessage="No new students waiting for activation"
+          emptyMessage={t("admin.newStudents.noNewStudents")}
         />
       </div>
 
@@ -265,7 +267,7 @@ export function AdminNewStudents() {
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Activate Student</DialogTitle>
+            <DialogTitle>{t("admin.newStudents.activateStudent")}</DialogTitle>
           </DialogHeader>
           {selectedStudent && (
             <div className="pt-4">
@@ -283,7 +285,7 @@ export function AdminNewStudents() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    Select Group
+                    {t("admin.newStudents.selectGroup")}
                   </label>
                   <Select
                     value={selectedGroupId}
@@ -291,12 +293,12 @@ export function AdminNewStudents() {
                     disabled={isActivating}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose a group" />
+                      <SelectValue placeholder={t("admin.newStudents.chooseGroup")} />
                     </SelectTrigger>
                     <SelectContent>
                       {!groups || groups.length === 0 ? (
                         <div className="p-2 text-sm text-muted-foreground text-center">
-                          No groups available
+                          {t("admin.newStudents.noGroupsAvailable")}
                         </div>
                       ) : (
                         groups.map((group) => (
@@ -304,7 +306,7 @@ export function AdminNewStudents() {
                             <div className="flex items-center justify-between w-full">
                               <span>{group.name}</span>
                               <span className="text-xs text-muted-foreground ml-2">
-                                ({group.level} • {group.student_count} students)
+                                ({group.level} • {group.student_count} {t("admin.groups.students").toLowerCase()})
                               </span>
                             </div>
                           </SelectItem>
@@ -320,7 +322,7 @@ export function AdminNewStudents() {
                 {selectedLevel && (
                   <div className="bg-primary/5 border border-primary/10 rounded-lg p-3">
                     <p className="text-sm text-muted-foreground">
-                      Group Level: <span className="font-semibold text-foreground">{selectedLevel}</span>
+                      {t("admin.newStudents.groupLevel")} <span className="font-semibold text-foreground">{selectedLevel}</span>
                     </p>
                   </div>
                 )}
@@ -331,7 +333,7 @@ export function AdminNewStudents() {
                     onClick={() => setIsActivateOpen(false)}
                     disabled={isActivating}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button 
                     onClick={handleActivate}
@@ -339,7 +341,7 @@ export function AdminNewStudents() {
                     className="gap-2"
                   >
                     {isActivating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                    Activate Student
+                    {t("admin.newStudents.activateStudent")}
                   </Button>
                 </div>
               </div>

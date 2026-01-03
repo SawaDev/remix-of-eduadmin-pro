@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardHeader,
@@ -23,6 +24,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+  const { t } = useTranslation();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -64,8 +66,8 @@ const Login = () => {
       await login(phone, password);
 
       toast({
-        title: "Success",
-        description: "Logged in successfully",
+        title: t("login.successTitle"),
+        description: t("login.successDescription"),
       });
 
       const user = useAuthStore.getState().user;
@@ -79,8 +81,8 @@ const Login = () => {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Invalid credentials or server error",
+        title: t("login.errorTitle"),
+        description: t("login.errorDescription"),
       });
     } finally {
       setIsLoading(false);
@@ -93,18 +95,18 @@ const Login = () => {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="w-7 h-7 text-primary-foreground" />
+              < GraduationCap className="w-7 h-7 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t("login.welcomeBack")}</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            {t("login.description")}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">{t("login.phoneLabel")}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -126,7 +128,7 @@ const Login = () => {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("login.passwordLabel")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -152,7 +154,7 @@ const Login = () => {
               type="submit"
               disabled={isSubmitDisabled}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? t("login.loggingIn") : t("login.submit")}
             </Button>
           </CardFooter>
         </form>

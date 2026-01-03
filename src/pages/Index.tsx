@@ -1,17 +1,29 @@
 import { Link, Navigate } from "react-router-dom";
-import { GraduationCap, Users, BookOpen, Shield } from "lucide-react";
+import { GraduationCap, Users, BookOpen, Shield, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Index = () => {
   const { user } = useAuthStore();
+  const { t, i18n } = useTranslation();
 
   if (user) {
     return (
       <Navigate to={user.role === "Admin" ? "/admin" : "/teacher"} replace />
     );
   }
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,10 +38,26 @@ const Index = () => {
               LMS Admin
             </span>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Languages className="w-4 h-4 text-muted-foreground" />
+              <Select
+                value={i18n.language}
+                onValueChange={changeLanguage}
+              >
+                <SelectTrigger className="w-[160px] h-9">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                  <SelectItem value="ru">🇷🇺 Русский</SelectItem>
+                  <SelectItem value="uz">🇺🇿 O'zbekcha</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {!user && (
               <Link to="/login">
-                <Button>Login</Button>
+                <Button>{t("index.login")}</Button>
               </Link>
             )}
           </div>
@@ -40,12 +68,11 @@ const Index = () => {
       <main className="container mx-auto px-6 py-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            English Learning Platform
-            <span className="block text-primary mt-2">Admin Panel</span>
+            {t("index.title")}
+            <span className="block text-primary mt-2">{t("index.subtitle")}</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Manage your online paid LMS with role-based access for teachers and
-            administrators
+            {t("index.description")}
           </p>
         </div>
 
@@ -56,10 +83,10 @@ const Index = () => {
               <Users className="w-7 h-7 text-primary" />
             </div>
             <h3 className="font-semibold text-foreground mb-2">
-              Group Management
+              {t("index.features.groupManagement.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Create and manage study groups with up to 20 students each
+              {t("index.features.groupManagement.description")}
             </p>
           </div>
           <div className="content-card text-center">
@@ -67,10 +94,10 @@ const Index = () => {
               <BookOpen className="w-7 h-7 text-success" />
             </div>
             <h3 className="font-semibold text-foreground mb-2">
-              Teacher Roles
+              {t("index.features.teacherRoles.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Assign main teachers and assistants to each group
+              {t("index.features.teacherRoles.description")}
             </p>
           </div>
           <div className="content-card text-center">
@@ -78,10 +105,10 @@ const Index = () => {
               <Shield className="w-7 h-7 text-warning" />
             </div>
             <h3 className="font-semibold text-foreground mb-2">
-              Payment Tracking
+              {t("index.features.paymentTracking.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Monitor payment periods and auto-block expired accounts
+              {t("index.features.paymentTracking.description")}
             </p>
           </div>
         </div>

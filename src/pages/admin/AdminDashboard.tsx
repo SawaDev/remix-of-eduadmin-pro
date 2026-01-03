@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   GraduationCap,
@@ -40,6 +41,7 @@ interface NewStudentsResponse {
 }
 
 export function AdminDashboard() {
+  const { t } = useTranslation();
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["adminStats"],
     queryFn: async () => {
@@ -72,25 +74,25 @@ export function AdminDashboard() {
     },
     {
       key: "full_name",
-      header: "Name",
+      header: t("common.name"),
       render: (student: NewStudent) => (
         <span className="font-medium text-foreground">{student.full_name}</span>
       ),
     },
     {
       key: "phone",
-      header: "Phone",
+      header: t("common.phone"),
     },
     {
       key: "created_at",
-      header: "Registered",
+      header: t("common.registered"),
       render: (student: NewStudent) => (
         <span>{new Date(student.created_at).toLocaleDateString()}</span>
       ),
     },
     {
       key: "status",
-      header: "Status",
+      header: t("common.status"),
       render: () => <StatusBadge status="NEW_STUDENT" />,
     },
   ];
@@ -106,14 +108,14 @@ export function AdminDashboard() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">Admin Dashboard</h1>
-        <p className="page-subtitle">Overview of your LMS platform</p>
+        <h1 className="page-title">{t("admin.dashboard.title")}</h1>
+        <p className="page-subtitle">{t("admin.dashboard.subtitle")}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
-          title="Total Students"
+          title={t("admin.dashboard.totalStudents")}
           value={stats?.total_students || 0}
           icon={GraduationCap}
           trend={{
@@ -122,17 +124,17 @@ export function AdminDashboard() {
           }}
         />
         <StatCard
-          title="Active Groups"
+          title={t("admin.dashboard.activeGroups")}
           value={stats?.active_groups || 0}
           icon={Users}
         />
         <StatCard
-          title="Teachers"
+          title={t("admin.dashboard.teachers")}
           value={stats?.total_teachers || 0}
           icon={BookOpen}
         />
         <StatCard
-          title="Blocked/Expired"
+          title={t("admin.dashboard.blockedExpired")}
           value={stats?.blocked_users || 0}
           icon={UserX}
           iconClassName="bg-destructive/10"
@@ -150,9 +152,9 @@ export function AdminDashboard() {
               <Plus className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Create Group</h3>
+              <h3 className="font-semibold text-foreground">{t("admin.dashboard.createGroup")}</h3>
               <p className="text-sm text-muted-foreground">
-                Add a new study group
+                {t("admin.dashboard.createGroupDesc")}
               </p>
             </div>
           </div>
@@ -167,9 +169,9 @@ export function AdminDashboard() {
               <BookOpen className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Assign Teacher</h3>
+              <h3 className="font-semibold text-foreground">{t("admin.dashboard.assignTeacher")}</h3>
               <p className="text-sm text-muted-foreground">
-                Manage teacher assignments
+                {t("admin.dashboard.assignTeacherDesc")}
               </p>
             </div>
           </div>
@@ -184,9 +186,9 @@ export function AdminDashboard() {
               <UserPlus className="w-6 h-6 text-success" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">New Students</h3>
+              <h3 className="font-semibold text-foreground">{t("admin.dashboard.newStudents")}</h3>
               <p className="text-sm text-muted-foreground">
-                {newStudents?.length || 0} waiting for activation
+                {newStudents?.length || 0} {t("admin.dashboard.newStudentsDesc")}
               </p>
             </div>
           </div>
@@ -197,17 +199,17 @@ export function AdminDashboard() {
       <div className="content-card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">
-            Recent Registrations
+            {t("admin.dashboard.recentRegistrations")}
             {newStudents && newStudents.length > 0 && (
               <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
-                {newStudents.length} new
+                {t("admin.dashboard.newCount", { count: newStudents.length })}
               </span>
             )}
           </h2>
           <Link to="/admin/new-students">
             <Button variant="ghost" size="sm" className="gap-2">
               <Eye className="w-4 h-4" />
-              View All
+              {t("common.viewAll")}
             </Button>
           </Link>
         </div>
@@ -215,7 +217,7 @@ export function AdminDashboard() {
           columns={newStudentColumns}
           data={newStudents.slice(0, 5)}
           keyExtractor={(student) => student.id.toString()}
-          emptyMessage="No new registrations"
+          emptyMessage={t("admin.dashboard.noNewRegistrations")}
         />
       </div>
     </div>

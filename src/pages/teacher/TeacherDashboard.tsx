@@ -8,6 +8,7 @@ import { RoleBadge } from "@/components/ui/role-badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/axios";
+import { useTranslation } from "react-i18next";
 
 interface TeacherStats {
   groups_count: number;
@@ -26,6 +27,7 @@ interface TeacherGroup {
 }
 
 export function TeacherDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -47,26 +49,26 @@ export function TeacherDashboard() {
   const columns = [
     {
       key: 'name',
-      header: 'Group Name',
+      header: t('teacher.dashboard.table.groupName'),
       render: (group: TeacherGroup) => (
         <span className="font-medium text-foreground">{group.name}</span>
       ),
     },
     {
       key: 'level',
-      header: 'Level',
+      header: t('teacher.dashboard.table.level'),
       render: (group: TeacherGroup) => <LevelBadge level={group.level} />,
     },
     {
       key: 'students',
-      header: 'Students',
+      header: t('teacher.dashboard.table.students'),
       render: (group: TeacherGroup) => (
         <span>{group.student_count}/{group.max_students}</span>
       ),
     },
     {
       key: 'role',
-      header: 'Your Role',
+      header: t('teacher.dashboard.table.yourRole'),
       render: (group: TeacherGroup) => <RoleBadge role={group.teacher_role} />,
     },
     {
@@ -74,7 +76,7 @@ export function TeacherDashboard() {
       header: '',
       render: (group: TeacherGroup) => (
         <Link to={`/teacher/groups/${group.id}`}>
-          <Button variant="outline" size="sm">Open Group</Button>
+          <Button variant="outline" size="sm">{t('teacher.dashboard.openGroup')}</Button>
         </Link>
       ),
     },
@@ -92,30 +94,30 @@ export function TeacherDashboard() {
     <div className="animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">
-          Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+          {t('teacher.dashboard.welcomeBack')}{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
-        <p className="page-subtitle">Here's what's happening with your groups today</p>
+        <p className="page-subtitle">{t('teacher.dashboard.subtitle')}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
-          title="My Groups"
+          title={t('teacher.dashboard.stats.myGroups')}
           value={stats?.groups_count ?? 0}
           icon={Users}
         />
         <StatCard
-          title="Total Students"
+          title={t('teacher.dashboard.stats.totalStudents')}
           value={stats?.total_students ?? 0}
           icon={Users}
         />
         <StatCard
-          title="Active Assignments"
+          title={t('teacher.dashboard.stats.activeAssignments')}
           value={stats?.active_assignments ?? 0}
           icon={ClipboardList}
         />
         <StatCard
-          title="Pending Reviews"
+          title={t('teacher.dashboard.stats.pendingReviews')}
           value={stats?.pending_reviews ?? 0}
           icon={Award}
           iconClassName={(stats?.pending_reviews ?? 0) > 0 ? 'bg-warning/10' : undefined}
@@ -125,16 +127,16 @@ export function TeacherDashboard() {
       {/* Groups Table */}
       <div className="content-card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">My Groups</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('teacher.dashboard.stats.myGroups')}</h2>
           <Link to="/teacher/groups">
-            <Button variant="ghost" size="sm">View All</Button>
+            <Button variant="ghost" size="sm">{t('common.viewAll')}</Button>
           </Link>
         </div>
         <DataTable
           columns={columns}
           data={teacherGroups || []}
           keyExtractor={(group) => group.id.toString()}
-          emptyMessage="You haven't been assigned to any groups yet."
+          emptyMessage={t('teacher.dashboard.noGroups')}
         />
       </div>
     </div>

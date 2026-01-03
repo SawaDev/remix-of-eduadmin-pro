@@ -26,6 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/axios";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const teacherSchema = z.object({
   name: z.string().trim().min(1, "Full name is required"),
@@ -63,6 +64,7 @@ interface CreateTeacherResponse {
 }
 
 export function AdminTeachers() {
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTeacherId, setEditingTeacherId] = useState<number | null>(null);
   const [resetPasswordId, setResetPasswordId] = useState<number | null>(null);
@@ -114,15 +116,15 @@ export function AdminTeachers() {
       });
 
       toast({
-        title: "Success",
-        description: "Teacher created successfully. Login credentials generated.",
+        title: t('common.success'),
+        description: t('admin.teachers.createdSuccess'),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to create teacher",
+        title: t('common.error'),
+        description: t('admin.teachers.createError'), // Note: added this to translations? I missed it.
       });
     },
   });
@@ -135,15 +137,15 @@ export function AdminTeachers() {
       queryClient.invalidateQueries({ queryKey: ["adminTeachersList"] });
       closeDialog();
       toast({
-        title: "Success",
-        description: "Teacher updated successfully",
+        title: t('common.success'),
+        description: t('admin.teachers.updateSuccess'),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update teacher",
+        title: t('common.error'),
+        description: t('admin.teachers.updateError'),
       });
     },
   });
@@ -158,15 +160,15 @@ export function AdminTeachers() {
       setResetPasswordId(null);
       setNewPassword("");
       toast({
-        title: "Success",
-        description: "Password updated successfully",
+        title: t('common.success'),
+        description: t('admin.teachers.passwordUpdateSuccess'),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to reset password",
+        title: t('common.error'),
+        description: t('admin.teachers.resetPasswordError'),
       });
     },
   });
@@ -193,8 +195,8 @@ export function AdminTeachers() {
       setTouched({ name: true, email: true, phone: true, teacher_type: true });
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Please fix the highlighted fields",
+        title: t('admin.groups.validationError'),
+        description: t('admin.groups.fixFields'),
       });
       return;
     }
@@ -210,8 +212,8 @@ export function AdminTeachers() {
     if (!newPassword || newPassword.length < 6) {
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Password must be at least 6 characters",
+        title: t('admin.groups.validationError'),
+        description: t('admin.teachers.passwordMinLength'),
       });
       return;
     }
@@ -252,8 +254,8 @@ export function AdminTeachers() {
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
             toast({
-                title: "Copied",
-                description: "Password copied to clipboard",
+                title: t('admin.teachers.copyPassword'),
+                description: t('admin.teachers.copyPasswordAuto'),
             });
         });
     }
@@ -273,7 +275,7 @@ export function AdminTeachers() {
     },
     {
       key: "name",
-      header: "Name",
+      header: t('common.name'),
       render: (teacher: Teacher) => (
         <div>
           <span className="font-medium text-foreground">{teacher.name}</span>
@@ -283,29 +285,28 @@ export function AdminTeachers() {
     },
     {
       key: "phone",
-      header: "Phone",
+      header: t('common.phone'),
     },
     {
       key: "role",
-      header: "Role",
+      header: t('common.role'),
       render: (teacher: Teacher) => (
         <RoleBadge role={teacher.position} />
       ),
     },
     {
       key: "groups",
-      header: "Assigned Groups",
+      header: t('admin.teachers.assignedGroups'),
       render: (teacher: Teacher) => (
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-muted-foreground" />
           <div className="flex flex-col leading-tight">
             <span>
-              {teacher.assigned_groups_count} group
-              {teacher.assigned_groups_count !== 1 ? "s" : ""}
+              {t('admin.teachers.groupCount', { count: teacher.assigned_groups_count })}
             </span>
             {(teacher.main_groups !== undefined || teacher.assistant_groups !== undefined) && (
               <span className="text-xs text-muted-foreground">
-                Main: {teacher.main_groups ?? 0} • Assistant: {teacher.assistant_groups ?? 0}
+                {t('admin.teachers.main')}: {teacher.main_groups ?? 0} • {t('admin.teachers.assistant')}: {teacher.assistant_groups ?? 0}
               </span>
             )}
           </div>
@@ -314,7 +315,7 @@ export function AdminTeachers() {
     },
     {
       key: "createdAt",
-      header: "Joined",
+      header: t('admin.teachers.joined'),
       render: (teacher: Teacher) => (
         <span className="text-muted-foreground">
           {new Date(teacher.created_at).toLocaleDateString()}
@@ -333,7 +334,7 @@ export function AdminTeachers() {
             onClick={() => setResetPasswordId(teacher.id)}
           >
             <Key className="w-4 h-4" />
-            Reset Password
+            {t('admin.teachers.resetPassword')}
           </Button>
           <Button
             variant="ghost"
@@ -364,25 +365,25 @@ export function AdminTeachers() {
     <div className="animate-fade-in">
       <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="page-title">Teachers Management</h1>
-          <p className="page-subtitle">Create and manage teacher accounts</p>
+          <h1 className="page-title">{t('admin.teachers.title')}</h1>
+          <p className="page-subtitle">{t('admin.teachers.subtitle')}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" onClick={openCreateDialog}>
               <Plus className="w-4 h-4" />
-              Create Teacher
+              {t('admin.teachers.create')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingTeacherId ? "Edit Teacher" : "Create New Teacher"}
+                {editingTeacherId ? t('admin.teachers.edit') : t('admin.teachers.new')}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('admin.teachers.fullName')}</Label>
                 <Input
                   id="name"
                   placeholder="John Smith"
@@ -400,7 +401,7 @@ export function AdminTeachers() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('admin.teachers.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -419,7 +420,7 @@ export function AdminTeachers() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('admin.teachers.phone')}</Label>
                 <Input
                   id="phone"
                   placeholder="+1 234 567 8900"
@@ -437,7 +438,7 @@ export function AdminTeachers() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>Role</Label>
+                <Label>{t('admin.teachers.role')}</Label>
                 <Select
                   value={teacherForm.teacher_type}
                   onValueChange={(v) => {
@@ -450,8 +451,8 @@ export function AdminTeachers() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="main">Main Teacher</SelectItem>
-                    <SelectItem value="assistant">Assistant Teacher</SelectItem>
+                    <SelectItem value="main">{t('admin.teachers.mainTeacher')}</SelectItem>
+                    <SelectItem value="assistant">{t('admin.teachers.assistantTeacher')}</SelectItem>
                   </SelectContent>
                 </Select>
                 {touched.teacher_type && fieldErrors.teacher_type && (
@@ -462,23 +463,22 @@ export function AdminTeachers() {
               {!editingTeacherId && (
                 <div className="bg-muted/50 rounded-lg p-4 mt-4">
                   <p className="text-sm text-muted-foreground">
-                    <strong>Note:</strong> Login credentials will be
-                    auto-generated and can be shared with the teacher.
+                    <strong>Note:</strong> {t('admin.teachers.credentialsNote')}
                   </p>
                 </div>
               )}
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={closeDialog} disabled={isSaving}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitDisabled}
                 >
                   {isSaving
-                    ? (editingTeacherId ? "Updating..." : "Creating...")
-                    : (editingTeacherId ? "Update Teacher" : "Create & Generate Login")}
+                    ? (editingTeacherId ? t('common.updating') : t('common.saving'))
+                    : (editingTeacherId ? t('admin.teachers.update') : t('admin.teachers.createAndGenerate'))}
                 </Button>
               </div>
             </div>
@@ -489,19 +489,19 @@ export function AdminTeachers() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="content-card">
-          <p className="text-sm text-muted-foreground">Total Teachers</p>
+          <p className="text-sm text-muted-foreground">{t('admin.teachers.total')}</p>
           <p className="text-3xl font-semibold text-foreground mt-1">
             {teachers?.length || 0}
           </p>
         </div>
         <div className="content-card">
-          <p className="text-sm text-muted-foreground">Main Teachers</p>
+          <p className="text-sm text-muted-foreground">{t('admin.teachers.mainCount')}</p>
           <p className="text-3xl font-semibold text-primary mt-1">
             {mainTeachersCount}
           </p>
         </div>
         <div className="content-card">
-          <p className="text-sm text-muted-foreground">Assistants</p>
+          <p className="text-sm text-muted-foreground">{t('admin.teachers.assistantCount')}</p>
           <p className="text-3xl font-semibold text-muted-foreground mt-1">
             {assistantTeachersCount}
           </p>
@@ -513,7 +513,7 @@ export function AdminTeachers() {
           columns={columns}
           data={teachers || []}
           keyExtractor={(teacher) => teacher.id.toString()}
-          emptyMessage="No teachers created yet."
+          emptyMessage={t('admin.teachers.noTeachers')}
         />
       </div>
 
@@ -524,15 +524,15 @@ export function AdminTeachers() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
+            <DialogTitle>{t('admin.teachers.resetPassword')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
+              <Label htmlFor="new-password">{t('admin.teachers.newPassword')}</Label>
               <Input
                 id="new-password"
                 type="text"
-                placeholder="Enter new password"
+                placeholder={t('admin.teachers.newPasswordPlaceholder')}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
@@ -540,13 +540,13 @@ export function AdminTeachers() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetPasswordId(null)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={handleResetPassword}
               disabled={resetPasswordMutation.isPending}
             >
-              {resetPasswordMutation.isPending ? "Saving..." : "Save New Password"}
+              {resetPasswordMutation.isPending ? t('common.saving') : t('admin.teachers.saveNewPassword')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -556,9 +556,9 @@ export function AdminTeachers() {
       <Dialog open={!!createdTeacherCredentials} onOpenChange={(open) => !open && setCreatedTeacherCredentials(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Teacher Created Successfully</DialogTitle>
+            <DialogTitle>{t('admin.teachers.createdSuccess')}</DialogTitle>
             <DialogDescription>
-              The password has been automatically generated. Please share these credentials with the teacher.
+              {t('admin.teachers.createdDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
@@ -569,12 +569,12 @@ export function AdminTeachers() {
                 </Button>
              </div>
              <p className="text-sm text-muted-foreground text-center">
-                {isCopied ? "Password copied to clipboard!" : "Password copied to clipboard automatically."}
+                {isCopied ? t('admin.teachers.copyPassword') : t('admin.teachers.copyPasswordAuto')}
              </p>
           </div>
           <DialogFooter>
             <Button onClick={() => setCreatedTeacherCredentials(null)}>
-              Done
+              {t('admin.teachers.done')}
             </Button>
           </DialogFooter>
         </DialogContent>

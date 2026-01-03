@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { RoleBadge } from "@/components/ui/role-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -85,6 +86,7 @@ interface UpdateGroupData {
 }
 
 export function AdminGroupDetail() {
+  const { t } = useTranslation();
   const { groupId } = useParams<{ groupId: string }>();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isAddStudentsOpen, setIsAddStudentsOpen] = useState(false);
@@ -152,21 +154,21 @@ export function AdminGroupDetail() {
   const validateEditGroup = useMemo(() => {
     const errors: Partial<Record<keyof UpdateGroupData | "form", string>> = {};
 
-    if (!trimmedEditName) errors.name = "Group name is required.";
-    else if (trimmedEditName.length < 2) errors.name = "Group name is too short.";
+    if (!trimmedEditName) errors.name = t("admin.groups.detail.nameRequired");
+    else if (trimmedEditName.length < 2) errors.name = t("admin.groups.detail.nameTooShort");
     else if (trimmedEditName.length > 80)
-      errors.name = "Group name must be 80 characters or less.";
+      errors.name = t("admin.groups.detail.nameTooLong");
 
-    if (!editGroup.level?.trim()) errors.level = "Level is required.";
+    if (!editGroup.level?.trim()) errors.level = t("admin.groups.detail.levelRequired");
 
     if (!editGroup.main_teacher_id)
-      errors.main_teacher_id = "Main teacher is required.";
+      errors.main_teacher_id = t("admin.groups.detail.mainTeacherRequired");
 
     if (
       editGroup.assistant_teacher_id &&
       editGroup.assistant_teacher_id === editGroup.main_teacher_id
     ) {
-      errors.assistant_teacher_id = "Assistant teacher must be different from main teacher.";
+      errors.assistant_teacher_id = t("admin.groups.detail.assistantDifferent");
     }
 
     return errors;
@@ -175,6 +177,7 @@ export function AdminGroupDetail() {
     editGroup.level,
     editGroup.main_teacher_id,
     trimmedEditName,
+    t,
   ]);
 
   const isEditValid = Object.keys(validateEditGroup).length === 0;
@@ -208,15 +211,15 @@ export function AdminGroupDetail() {
       });
       setIsEditOpen(false);
       toast({
-        title: "Success",
-        description: "Group updated successfully",
+        title: t("common.success"),
+        description: t("admin.groups.updateSuccess"),
       });
     },
     onError: (err) => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: getApiErrorMessage(err, "Failed to update group"),
+        title: t("common.error"),
+        description: getApiErrorMessage(err, t("admin.groups.updateError")),
       });
     },
   });
@@ -233,15 +236,15 @@ export function AdminGroupDetail() {
         queryKey: ["adminGroupDetail", groupId],
       });
       toast({
-        title: "Success",
-        description: "Student removed from group",
+        title: t("common.success"),
+        description: t("admin.groups.detail.removeSuccess"),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to remove student",
+        title: t("common.error"),
+        description: t("admin.groups.detail.removeError"),
       });
     },
   });
@@ -252,8 +255,8 @@ export function AdminGroupDetail() {
     if (Object.keys(errors).length > 0) return;
     if (!isEditDirty) {
       toast({
-        title: "No changes",
-        description: "Nothing to update.",
+        title: t("admin.groups.detail.noChanges"),
+        description: t("admin.groups.detail.nothingToUpdate"),
       });
       return;
     }
@@ -265,7 +268,7 @@ export function AdminGroupDetail() {
   };
 
   const handleRemoveStudent = (studentId: number) => {
-    if (confirm("Are you sure you want to remove this student?")) {
+    if (confirm(t("admin.groups.detail.removeConfirm"))) {
       removeStudentMutation.mutate(studentId);
     }
   };
@@ -281,10 +284,10 @@ export function AdminGroupDetail() {
   if (!group) {
     return (
       <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-muted-foreground">Group not found</p>
+        <p className="text-muted-foreground">{t("admin.groups.detail.notFound")}</p>
         <Link to="/admin/groups">
           <Button variant="outline" className="mt-4">
-            Back to Groups
+            {t("admin.groups.detail.backToGroups")}
           </Button>
         </Link>
       </div>
@@ -305,23 +308,23 @@ export function AdminGroupDetail() {
     },
     {
       key: "name",
-      header: "Name",
+      header: t("common.name"),
       render: (student: Student) => (
         <span className="font-medium text-foreground">{student.name}</span>
       ),
     },
     {
       key: "phone",
-      header: "Phone",
+      header: t("common.phone"),
     },
     {
       key: "status",
-      header: "Status",
+      header: t("common.status"),
       render: (student: Student) => <StatusBadge status={student.status} />,
     },
     {
       key: "attendance_rate",
-      header: "Attendance",
+      header: t("admin.groups.detail.attendance"),
       render: (student: Student) => <span>{student.attendance_rate}%</span>,
     },
     {
@@ -354,7 +357,7 @@ export function AdminGroupDetail() {
           <div className="flex items-center gap-3">
             <h1 className="page-title">{group.name}</h1>
           </div>
-          <p className="page-subtitle">Manage group settings and students</p>
+          <p className="page-subtitle">{t("admin.groups.detail.subtitle")}</p>
         </div>
         <Dialog
           open={isEditOpen}
@@ -371,7 +374,7 @@ export function AdminGroupDetail() {
           <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Pencil className="w-4 h-4" />
-          Edit Group
+          {t("admin.groups.edit")}
         </Button>
           </DialogTrigger>
           <DialogContent
@@ -383,7 +386,7 @@ export function AdminGroupDetail() {
             }}
           >
             <DialogHeader>
-              <DialogTitle>Edit Group</DialogTitle>
+              <DialogTitle>{t("admin.groups.edit")}</DialogTitle>
             </DialogHeader>
             <form
               className="space-y-4 pt-4"
@@ -393,10 +396,10 @@ export function AdminGroupDetail() {
               }}
             >
               <div className="space-y-2">
-                <Label htmlFor="name">Group Name *</Label>
+                <Label htmlFor="name">{t("admin.groups.name")} *</Label>
                 <Input
                   id="name"
-                  placeholder="e.g., Morning Beginners A"
+                  placeholder={t("admin.groups.placeholderName")}
                   value={editGroup.name}
                   onChange={(e) =>
                     setEditGroup({ ...editGroup, name: e.target.value })
@@ -415,7 +418,7 @@ export function AdminGroupDetail() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="level">Level *</Label>
+                <Label htmlFor="level">{t("admin.groups.level")} *</Label>
                 <Select
                   value={editGroup.level}
                   onValueChange={(value) =>
@@ -423,17 +426,17 @@ export function AdminGroupDetail() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder={t("admin.groups.selectLevel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {levelsLoading && (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        Loading levels...
+                        {t("admin.groups.loadingLevels")}
                       </div>
                     )}
                     {!levelsLoading && (levelsData?.length ?? 0) === 0 && (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                        No levels found
+                        {t("admin.groups.noLevels")}
                       </div>
                     )}
                     {(levelsData || []).map((lvl) => (
@@ -450,7 +453,7 @@ export function AdminGroupDetail() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="mainTeacher">Main Teacher *</Label>
+                <Label htmlFor="mainTeacher">{t("admin.groups.mainTeacher")} *</Label>
                 <Select
                   value={editGroup.main_teacher_id}
                   onValueChange={(value) =>
@@ -458,7 +461,7 @@ export function AdminGroupDetail() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select teacher" />
+                    <SelectValue placeholder={t("admin.groups.selectTeacher")} />
                   </SelectTrigger>
                   <SelectContent>
                     {teachersData?.teachers.map((teacher) => (
@@ -479,7 +482,7 @@ export function AdminGroupDetail() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="assistantTeacher">
-                  Assistant Teacher (Optional)
+                  {t("admin.groups.assistantTeacher")}
                 </Label>
                 <Select
                   value={editGroup.assistant_teacher_id}
@@ -491,10 +494,10 @@ export function AdminGroupDetail() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select assistant" />
+                    <SelectValue placeholder={t("admin.groups.selectAssistant")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none">{t("admin.groups.none")}</SelectItem>
                     {teachersData?.assistants.map((teacher) => (
                       <SelectItem
                         key={teacher.id}
@@ -522,7 +525,7 @@ export function AdminGroupDetail() {
                   }}
                   disabled={updateGroupMutation.isPending}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -532,7 +535,7 @@ export function AdminGroupDetail() {
                     !isEditValid
                   }
                 >
-                  {updateGroupMutation.isPending ? "Updating..." : "Update Group"}
+                  {updateGroupMutation.isPending ? t("common.updating") : t("admin.groups.update")}
                 </Button>
               </div>
             </form>
@@ -545,7 +548,7 @@ export function AdminGroupDetail() {
         {/* Capacity */}
         <div className="content-card">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
-            Students
+            {t("admin.groups.detail.capacity")}
           </h3>
           <div className="flex items-center gap-3">
             <div className="flex-1">
@@ -553,7 +556,7 @@ export function AdminGroupDetail() {
                 <span className="text-2xl font-semibold">
                   {group.students.length}
                 </span>
-                <span className="text-muted-foreground">Students</span>
+                <span className="text-muted-foreground">{t("admin.groups.students")}</span>
               </div>
             </div>
           </div>
@@ -562,7 +565,7 @@ export function AdminGroupDetail() {
         {/* Main Teacher */}
         <div className="content-card">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
-            Main Teacher
+            {t("admin.groups.mainTeacher")}
           </h3>
           {group.main_teacher ? (
             <div className="flex items-center gap-3">
@@ -583,14 +586,14 @@ export function AdminGroupDetail() {
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground">Not assigned</p>
+            <p className="text-muted-foreground">{t("common.notAssigned")}</p>
           )}
         </div>
 
         {/* Assistant Teacher */}
         <div className="content-card">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
-            Assistant Teacher
+            {t("admin.groups.detail.assistantTeacher")}
           </h3>
           {group.assistant_teacher ? (
             <div className="flex items-center gap-3">
@@ -612,7 +615,7 @@ export function AdminGroupDetail() {
             </div>
           ) : (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span>Not assigned</span>
+              <span>{t("common.notAssigned")}</span>
             </div>
           )}
         </div>
@@ -621,17 +624,17 @@ export function AdminGroupDetail() {
       {/* Students */}
       <div className="content-card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Students</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t("admin.groups.students")}</h2>
           <Button className="gap-2" onClick={() => setIsAddStudentsOpen(true)}>
             <UserPlus className="w-4 h-4" />
-            Add Student
+            {t("admin.groups.detail.addStudent")}
           </Button>
         </div>
         <DataTable
           columns={studentColumns}
           data={group.students}
           keyExtractor={(student) => student.id.toString()}
-          emptyMessage="No students in this group."
+          emptyMessage={t("admin.groups.detail.noStudents")}
         />
       </div>
 

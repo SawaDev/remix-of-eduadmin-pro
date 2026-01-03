@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import api from "@/lib/axios";
+import { useTranslation } from "react-i18next";
 
 interface TeacherGroup {
   id: number;
@@ -24,6 +25,7 @@ interface GroupGradeSummary {
 }
 
 export function TeacherGrades() {
+  const { t } = useTranslation();
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const selectedGroupIdNum = Number(selectedGroupId);
 
@@ -68,19 +70,19 @@ export function TeacherGrades() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">Grades</h1>
-        <p className="page-subtitle">View student grades and rankings</p>
+        <h1 className="page-title">{t('teacher.grades.title')}</h1>
+        <p className="page-subtitle">{t('teacher.grades.subtitle')}</p>
       </div>
 
       {/* Controls */}
       <div className="content-card mb-6">
         <div className="flex-1 max-w-xs">
           <label className="text-sm font-medium text-muted-foreground mb-2 block">
-            Select Group
+            {t('teacher.grades.selectGroup')}
           </label>
           <Select value={selectedGroupId} onValueChange={setSelectedGroupId} disabled={groupsLoading}>
             <SelectTrigger>
-              <SelectValue placeholder={groupsLoading ? "Loading groups..." : "Select a group"} />
+              <SelectValue placeholder={groupsLoading ? t('teacher.grades.loadingGroups') : t('teacher.grades.selectGroupPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
               {(teacherGroups || []).map((group) => (
@@ -96,7 +98,7 @@ export function TeacherGrades() {
       {/* Grades Table */}
       <div className="content-card">
         <h2 className="text-lg font-semibold text-foreground mb-4">
-          {selectedGroup?.name || 'Select a group'} - Grade Overview
+          {selectedGroup?.name || t('teacher.grades.pleaseSelectGroup')} - {t('teacher.grades.overviewTitle')}
         </h2>
 
         {gradesLoading ? (
@@ -105,7 +107,7 @@ export function TeacherGrades() {
           </div>
         ) : (sorted?.length ?? 0) === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            {selectedGroupId ? 'No students in this group' : 'Please select a group'}
+            {selectedGroupId ? t('teacher.grades.noStudentsInGroup') : t('teacher.grades.pleaseSelectGroup')}
           </div>
         ) : (
           <div className="data-table overflow-x-auto">
@@ -113,19 +115,19 @@ export function TeacherGrades() {
               <thead>
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted/50">
-                    Rank
+                    {t('teacher.grades.rank')}
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted/50">
-                    Student
+                    {t('teacher.grades.student')}
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted/50">
-                    Last Assignment
+                    {t('teacher.grades.lastAssignment')}
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted/50">
-                    Attendance Score
+                    {t('teacher.grades.attendanceScore')}
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted/50">
-                    Avg Assignment
+                    {t('teacher.grades.avgAssignment')}
                   </th>
                 </tr>
               </thead>

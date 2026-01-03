@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
+import { useTranslation } from "react-i18next";
 import api from "@/lib/axios";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,6 +29,7 @@ interface PaymentStats {
 }
 
 export function AdminPayments() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -62,15 +64,17 @@ export function AdminPayments() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adminPayments"] });
       queryClient.invalidateQueries({ queryKey: ["adminPaymentStats"] });
-      toast({ title: "Success", description: "Payment period updated" });
+      toast({ title: t("common.success"), description: t("admin.payments.updateSuccess") });
       setIsUpdateOpen(false);
       setEditingPayment(null);
+      setStartDate("");
+      setEndDate("");
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update payment period",
+        title: t("common.error"),
+        description: t("admin.payments.updateError"),
       });
     },
   });
@@ -91,7 +95,7 @@ export function AdminPayments() {
     },
     {
       key: 'name',
-      header: 'Student',
+      header: t("admin.payments.allStudents"),
       render: (p: PaymentListItem) => (
         <div>
           <span className="font-medium text-foreground">{p.student_name}</span>
@@ -101,7 +105,7 @@ export function AdminPayments() {
     },
     {
       key: 'paymentPeriod',
-      header: 'Payment Period',
+      header: t("admin.payments.paymentPeriod"),
       render: (p: PaymentListItem) => (
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -115,28 +119,28 @@ export function AdminPayments() {
     },
     {
       key: 'daysRemaining',
-      header: 'Days Remaining',
+      header: t("admin.payments.daysRemaining"),
       render: (p: PaymentListItem) => {
         if (p.days_remaining === null || p.days_remaining === undefined) return <span>-</span>;
         if (p.days_remaining < 0) {
-          return <span className="text-destructive font-medium">{Math.abs(p.days_remaining)} days overdue</span>;
+          return <span className="text-destructive font-medium">{t("admin.payments.overdue", { count: Math.abs(p.days_remaining) })}</span>;
         }
         if (p.days_remaining <= 7) {
-          return <span className="text-warning font-medium">{p.days_remaining} days left</span>;
+          return <span className="text-warning font-medium">{t("admin.payments.daysLeft", { count: p.days_remaining })}</span>;
         }
-        return <span className="text-success">{p.days_remaining} days left</span>;
+        return <span className="text-success">{t("admin.payments.daysLeft", { count: p.days_remaining })}</span>;
       },
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t("common.status"),
       render: (p: PaymentListItem) => {
         const normalized = (p.status || "").toLowerCase();
         const isExpired = normalized === "expired" || normalized === "blocked";
         return (
           <div className="flex items-center gap-2">
             <StatusBadge status={p.status} />
-            {isExpired && <span className="text-xs text-destructive">Content blocked</span>}
+            {isExpired && <span className="text-xs text-destructive">{t("admin.payments.contentBlocked")}</span>}
           </div>
         );
       },
@@ -155,7 +159,7 @@ export function AdminPayments() {
             setIsUpdateOpen(true);
           }}
         >
-          Update Payment
+          {t("admin.payments.updatePayment")}
         </Button>
       ),
     },
@@ -175,8 +179,8 @@ export function AdminPayments() {
     if (!startDate || !endDate) {
       toast({
         variant: "destructive",
-        title: "Validation Error",
-        description: "Start date and end date are required",
+        title: t("admin.payments.validationError"),
+        description: t("admin.payments.datesRequired"),
       });
       return;
     }
@@ -198,8 +202,8 @@ export function AdminPayments() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">Payments & Blocking</h1>
-        <p className="page-subtitle">Manage student payment periods and access</p>
+        <h1 className="page-title">{t("admin.payments.title")}</h1>
+        <p className="page-subtitle">{t("admin.payments.subtitle")}</p>
       </div>
 
       {/* Stats */}
@@ -210,7 +214,7 @@ export function AdminPayments() {
               <CheckCircle className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Active Payments</p>
+              <p className="text-sm text-muted-foreground">{t("admin.payments.activePayments")}</p>
               <p className="text-2xl font-semibold text-foreground">{stats?.active_payments ?? 0}</p>
             </div>
           </div>
@@ -221,7 +225,7 @@ export function AdminPayments() {
               <AlertCircle className="w-5 h-5 text-destructive" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Expired/Blocked</p>
+              <p className="text-sm text-muted-foreground">{t("admin.payments.expiredBlocked")}</p>
               <p className="text-2xl font-semibold text-foreground">{stats?.expired_payments ?? 0}</p>
             </div>
           </div>
@@ -232,7 +236,7 @@ export function AdminPayments() {
               <Calendar className="w-5 h-5 text-warning" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Expiring Soon (7 days)</p>
+              <p className="text-sm text-muted-foreground">{t("admin.payments.expiringSoon")}</p>
               <p className="text-2xl font-semibold text-foreground">
                 {stats?.expiring_soon ?? 0}
               </p>
@@ -248,10 +252,10 @@ export function AdminPayments() {
             <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
             <div>
               <h3 className="font-semibold text-foreground">
-                {stats?.expired_payments ?? 0} student{(stats?.expired_payments ?? 0) !== 1 ? "s have" : " has"} expired payments
+                {t("admin.payments.expiredAlert", { count: stats?.expired_payments ?? 0 })}
               </h3>
               <p className="text-sm text-muted-foreground">
-                Their accounts are visible but content access is blocked until payment is renewed.
+                {t("admin.payments.expiredAlertDesc")}
               </p>
             </div>
           </div>
@@ -259,19 +263,19 @@ export function AdminPayments() {
       )}
 
       <div className="content-card">
-        <h2 className="text-lg font-semibold text-foreground mb-4">All Students</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">{t("admin.payments.allStudents")}</h2>
         <DataTable
           columns={columns}
           data={enrolledPayments}
           keyExtractor={(p) => p.id.toString()}
-          emptyMessage="No students found"
+          emptyMessage={t("admin.payments.noStudents")}
         />
       </div>
 
       <Dialog open={isUpdateOpen} onOpenChange={handleCloseUpdate}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Payment Period</DialogTitle>
+            <DialogTitle>{t("admin.payments.updatePeriod")}</DialogTitle>
           </DialogHeader>
 
           {editingPayment && (
@@ -290,11 +294,11 @@ export function AdminPayments() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Date</Label>
+                  <Label>{t("admin.payments.startDate")}</Label>
                   <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Date</Label>
+                  <Label>{t("admin.payments.endDate")}</Label>
                   <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                 </div>
               </div>
@@ -305,10 +309,10 @@ export function AdminPayments() {
                   onClick={() => handleCloseUpdate(false)}
                   disabled={updatePaymentMutation.isPending}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button onClick={handleSave} disabled={updatePaymentMutation.isPending}>
-                  {updatePaymentMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updatePaymentMutation.isPending ? t("common.saving") : t("common.save")}
                 </Button>
               </div>
             </div>
